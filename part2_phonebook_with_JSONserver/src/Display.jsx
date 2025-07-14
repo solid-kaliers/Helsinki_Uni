@@ -1,27 +1,26 @@
-const Display = ({value, filterName}) => {
-  if (filterName === "") {
-    return(
-    <>
-      {value.map((el) => <p key={el.id}>{el.name} {el.number}</p>)}
-    </>
-  )
-  }
+const Display = ({ value = [], filterName, deleteHandler }) => {
+  const personsToShow = filterName === ""
+    ? value
+    : value.filter(el => el.name.toLowerCase().includes(filterName.toLowerCase()));
 
-  const search = value.filter(el => el.name.toLowerCase().includes(filterName.toLowerCase())) 
-  if (search.length === 0) {
-    return(
-      <>
+  if (personsToShow.length === 0) {
+    return (
+      <div>
         <p>No contact found</p>
-      </>
-    )
+      </div>
+    );
   }
-  else if (search) {
-    return(
-      <>
-        {search.map((el) => <p key={el.id}>{el.name} {el.number}</p>)}
-      </>
-    )
-  }
-}
 
-export default Display
+  return (
+    <div>
+      {personsToShow.map((el) => (
+        <div key={el.id}>
+          <p>{el.name} {el.number}</p>
+          <button onClick={() => deleteHandler(el.id)}>delete</button>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export default Display;

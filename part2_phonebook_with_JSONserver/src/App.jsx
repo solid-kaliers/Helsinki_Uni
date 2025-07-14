@@ -1,16 +1,20 @@
-import { useState } from 'react'
+import { useState, useEffect, use } from 'react'
 import Display from './Display'
 import Header from "./Header"
 import Filter from "./Filter"
 import Form from './Form'
+import dbService from './dbService'
 
 const App = () => {
-  const [persons, setPersons] = useState([
-    { name: 'Arto Hellas', number: '040-123456', id: 1 },
-    { name: 'Ada Lovelace', number: '39-44-5323523', id: 2 },
-    { name: 'Dan Abramov', number: '12-43-234345', id: 3 },
-    { name: 'Mary Poppendieck', number: '39-23-6423122', id: 4 }
-  ]) 
+  const [persons, setPersons] = useState([]) 
+
+  useEffect(() => {
+    dbService
+      .getAllContacts()
+      .then(res => {
+        setPersons(res)})
+  }, [])
+    
 
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
@@ -19,14 +23,28 @@ const App = () => {
   const submitHandler = (event) => {
     event.preventDefault()
     if (persons.find(el => el.name === newName)) {
-      alert(`${newName} is already in the phonebook`)
+      let contact = persons.find(el => el.name === newName)
+      let index = persons.findIndex(el => el.name === newName)
+      let temp = [...persons]
+      temp[index] = {...contact, number: newNumber}
+      dbService
+        .changeContact(contact.id, {...contact, number: newNumber})
+        .then(res => setPersons(temp))
       return
     }
-    setPersons(persons.concat({
+
+    let newPerson = {
       name: newName,
       number: newNumber,
-      id: persons[persons.length - 1].id + 1
-    }))
+      id: persons.length === 0
+        ? "1"
+        : String(parseInt(persons[persons.length - 1].id) + 1)
+    }
+
+    dbService
+      .createContact(newPerson)
+      .then(res => {
+        setPersons(persons.concat(newPerson))})
   } 
 
   const nameChangeHandler = (event) => {
@@ -41,6 +59,13 @@ const App = () => {
     setNewFilter(event.target.value)
   }
 
+  const deleteHandler = (id) => {
+    console.log("test" + id)
+    dbService
+      .deleteContact(id)
+      .then(res => setPersons(persons.filter(el => el.id !== id)))
+  }
+
   return (
     <div>
       <Header data={"Phonebook"}/>
@@ -52,7 +77,7 @@ const App = () => {
           newNumber={newNumber}
           numberChangeHandler={numberChangeHandler}/>
       <Header data={"Numbers"}/>
-      <Display value={persons} filterName={newFitler} />
+      <Display value={persons} filterName={newFitler} deleteHandler={deleteHandler} />
     </div>
   )
 }
