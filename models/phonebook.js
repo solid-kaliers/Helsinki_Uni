@@ -1,9 +1,9 @@
 const mongoose = require("mongoose")
+const config = require("../utils/config")
 
-const url = process.env.MONGODB_URI
 mongoose.set('strictQuery', false)
 mongoose
-    .connect(url)
+    .connect(config.MONGODB_URI)
     .then(res => console.log("Connected to DB"))
     .catch(err => console.log("Error connection to DB:" + err.message))
 

@@ -1,16 +1,10 @@
-require("dotenv").config()
+const config = require("./utils/config")
 const express = require("express")
 const cors = require("cors")
+const logger = require("./utils/logger")
 const app = express()
 const PhoneBook = require("./models/phonebook")
 
-const logger = (req, res, next) => {
-    if(req.method === "POST") {
-        let string = `${new Date()}\t${req.method}\t${JSON.stringify(req.headers)}\t${JSON.stringify(req.body)}\t`
-        console.log(string);
-    }
-    next()
-}
 
 app.use(express.static('dist'))
 app.use(express.json())
@@ -92,7 +86,6 @@ app.post("/api/persons", (req, res, next) => {
     PhoneBook
         .find({$or: [{name: data.name}, {number: data.number}]})
         .then(queryResult => {
-            console.log(queryResult)
             if (queryResult.length > 0) {
                 res.status(400).json({error: "name or number already in Phonebook"})
                 return
@@ -125,7 +118,6 @@ const errorHandler = (error, request, response, next) => {
 
 app.use(errorHandler)
 
-const PORT = process.env.PORT || 3001
-app.listen(PORT, () => {
-    console.log("Listening on " + PORT);
+app.listen((config.PORT || 3001), () => {
+    console.log("Listening on " + (config.PORT || 3001));
 })
