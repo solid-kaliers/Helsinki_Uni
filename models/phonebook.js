@@ -1,11 +1,4 @@
 const mongoose = require("mongoose")
-const config = require("../utils/config")
-
-mongoose.set('strictQuery', false)
-mongoose
-    .connect(config.MONGODB_URI)
-    .then(res => console.log("Connected to DB"))
-    .catch(err => console.log("Error connection to DB:" + err.message))
 
 const phoneBookSchema = new mongoose.Schema({
   name: {
